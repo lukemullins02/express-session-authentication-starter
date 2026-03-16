@@ -3,11 +3,6 @@ const LocalStrategy = require("passport-local").Strategy;
 const pool = require("./database");
 const { validPassword } = require("../lib/passwordUtils");
 
-const customFields = {
-  usernameField: "uname",
-  passwordField: "pw",
-};
-
 const verifyCallback = async (username, password, done) => {
   try {
     const { rows } = await pool.query(
@@ -33,7 +28,7 @@ const verifyCallback = async (username, password, done) => {
   }
 };
 
-const strategy = new LocalStrategy(customFields, verifyCallback);
+const strategy = new LocalStrategy(verifyCallback);
 
 passport.use(strategy);
 

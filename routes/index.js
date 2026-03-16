@@ -1,16 +1,37 @@
 const router = require("express").Router();
 const passport = require("passport");
-const passwordUtils = require("../lib/passwordUtils");
+const { genPassword } = require("../lib/passwordUtils");
+const passwordUtils = require("../lib/passwordUtils").genPassword;
+const pool = require("../config/database");
 
 /**
  * -------------- POST ROUTES ----------------
  */
 
 // TODO
-router.post("/login", passport.authenticate("local"), (req, res, next) => {});
+router.post(
+  "/login",
+  passport.authenticate("local", {
+    failureRedirect: "/login-failure",
+    successRedirect: "/login-success",
+  }),
+  (req, res, next) => {},
+);
 
 // TODO
-router.post("/register", (req, res, next) => {});
+router.post("/register", async (req, res, next) => {
+  const saltHash = genPassword(req.body.password);
+  const username = req.body.username;
+
+  const salt = saltHash.salt;
+  const hash = saltHash.hash;
+
+  (await pool.query(
+    "INSERT INTO users (username, salt, hash) VALUES ($1,$2,$3)",
+    [username, salt, hash],
+  ),
+    res.redirect("/login"));
+});
 
 /**
  * -------------- GET ROUTES ----------------
@@ -63,8 +84,12 @@ router.get("/protected-route", (req, res, next) => {
 
 // Visiting this route logs the user out
 router.get("/logout", (req, res, next) => {
-  req.logout();
-  res.redirect("/protected-route");
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/login");
+  });
 });
 
 router.get("/login-success", (req, res, next) => {

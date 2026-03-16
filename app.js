@@ -13,11 +13,8 @@ var app = express();
 
 require("./config/passport");
 
-app.use(passport.initialize());
-app.use(passport.session());
-
 /**
- * -------------- GENERAL SETUP ----------------
+ * -------------- GENERALit SETUP ----------------
  */
 
 // Gives us access to variables set in the .env file via `process.env.VARIABLE_NAME` syntax
@@ -49,6 +46,9 @@ app.use(
     },
   }),
 );
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 /**
  * -------------- ROUTES ----------------
