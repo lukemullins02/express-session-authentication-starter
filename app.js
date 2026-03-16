@@ -9,7 +9,12 @@ const pool = require("./config/database");
 const PGStore = require("connect-pg-simple")(session);
 
 // Need to require the entire Passport config module so app.js knows about it
+var app = express();
+
 require("./config/passport");
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 /**
  * -------------- GENERAL SETUP ----------------
@@ -19,7 +24,6 @@ require("./config/passport");
 require("dotenv").config();
 
 // Create the Express application
-var app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -35,11 +39,11 @@ const sessionStore = new PGStore({ pool: pool, tableName: "sessions" });
  */
 
 app.use(
-  passport.session({
-    secret: "some secret",
+  session({
     store: sessionStore,
+    secret: "some secret",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24,
     },
